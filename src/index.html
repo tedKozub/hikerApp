@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="leaflet-routing-machine-3.2.12\dist\leaflet-routing-machine.css"/>
+
+    <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="leaflet-routing-machine-3.2.12\dist\leaflet-routing-machine.js"></script>
+    <style>
+        #map { height: 96vh;}
+        #footer { height: 4vh; background-color: #248ce0; color: white;}
+    </style>
+
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+     <div id="map"></div>
+     <div id="footer">Footer -- yay</div>
+    <script>
+        // create a map and add tile layer
+        var map = L.map('map').setView([51.505, -0.09], 13);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        // add marker and its popup
+        var marker = L.marker([51.5, -0.15]).addTo(map);
+        marker.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
+
+        var popup = L.popup()
+            .setLatLng([51.513, -0.09])
+            .setContent("I am a standalone popup.")
+            .openOn(map);
+
+        function createButton(label, container) {
+            var btn = L.DomUtil.create('button', '', container);
+            btn.setAttribute('type', 'button');
+            btn.innerHTML = label;
+            return btn;
+        }
+
+        // create the control object
+        var control = L.Routing.control({
+            waypoints: [],
+            }).addTo(map);
+
+        // add a click event listener to the map that opens a popup for
+        // adding start and end locations to the route
+        map.on('click', function(e) {
+            var container = L.DomUtil.create('div'),
+                startBtn = createButton('Start from this location', container),
+                destBtn = createButton('Go to this location', container);
+
+            L.popup()
+                .setContent(container)
+                .setLatLng(e.latlng)
+                .openOn(map);
+
+            L.DomEvent.on(startBtn, 'click', function() {
+                control.spliceWaypoints(0, 1, e.latlng);
+                map.closePopup();
+            });
+            L.DomEvent.on(destBtn, 'click', function() {
+                control.spliceWaypoints(control.getWaypoints().length - 1, 1, e.latlng);
+                map.closePopup();
+            }); 
+        });
+
+        // Hide the instructions control
+        var routeContainer = control.getContainer();
+        routeContainer.style.display = 'none';
+        
+
+
+    </script>
+
+</body>
+</html>
